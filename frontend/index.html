@@ -311,12 +311,35 @@
   function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
   async function saveApiUrl() {
-    let url = document.getElementById('api-url-input').value.trim().replace(/\/$/, '');
-    if (!url) return;
+    let url = document.getElementById('api-url-input').value.trim();
+    // Strip trailing slashes and also remove /query if the user pasted the full endpoint
+    url = url.replace(/\/+$/, '').replace(/\/query$/, '');
+    
+    if (!url) {
+      alert("Please enter a URL first.");
+      return;
+    }
+    
     API_URL = url;
     localStorage.setItem('lawracle_api', API_URL);
-    closeModal();
+    
+    const btn = document.querySelector('.btn-save');
+    btn.textContent = 'Testing...';
+    btn.disabled = true;
+    
+    // We wait for the test to finish
     await testConnection();
+    
+    btn.textContent = 'Save & Test';
+    btn.disabled = false;
+    
+    // Check if it actually connected
+    if (document.getElementById('status-label').textContent === 'API connected') {
+      closeModal();
+      alert("Successfully connected to Lawracle API!");
+    } else {
+      alert("Could not connect to the API. Make sure your URL is correct.\n\nNote: If you are using localtunnel, try opening " + API_URL + " in a new tab first and clicking 'Click to Continue', then come back here and try again.");
+    }
   }
 
   // ── Example queries ───────────────────────────────────────────
