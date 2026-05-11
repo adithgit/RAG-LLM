@@ -169,6 +169,13 @@ Keep your TOTAL response strictly under 150 words.
             device_map="auto",
             torch_dtype=torch.float16,
         )
+    elif torch.backends.mps.is_available():
+        logger.info("Apple Silicon GPU (MPS) detected! Using Metal for accelerated inference.")
+        model = AutoModelForCausalLM.from_pretrained(
+            LLM_MODEL_NAME,
+            device_map="mps",
+            torch_dtype=torch.float16,
+        )
     else:
         logger.warning("No GPU found! Loading model on CPU with float16 to reduce memory usage.")
         model = AutoModelForCausalLM.from_pretrained(
@@ -188,7 +195,7 @@ Keep your TOTAL response strictly under 150 words.
         model=model,
         tokenizer=tokenizer,
         context_window=2048,
-        max_new_tokens=256,
+        max_new_tokens=100,
         query_wrapper_prompt=query_wrapper_prompt,
         generate_kwargs={"temperature": 0.2, "do_sample": True},
     )
