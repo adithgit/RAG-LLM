@@ -20,18 +20,6 @@ COPY requirements.txt .
 # Install Python packages
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Pre-download models at build time so the container starts instantly
-# This avoids OOM crashes and slow startup in the pod
-RUN python3 -c "\
-import os; \
-os.makedirs('/app/model_cache', exist_ok=True); \
-from huggingface_hub import snapshot_download; \
-snapshot_download(repo_id='TinyLlama/TinyLlama-1.1B-Chat-v1.0', cache_dir='/app/model_cache'); \
-from sentence_transformers import SentenceTransformer; \
-SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/model_cache'); \
-print('All models downloaded successfully!')\
-"
-
 # Copy application code
 COPY app.py .
 

@@ -14,9 +14,38 @@ spec:
       labels:
         app: lawracle-backend
     spec:
+      initContainers:
+      - name: model-downloader
+        image: adithya952/lawracle-backend:latest
+        imagePullPolicy: Always
+        command: ["python3", "-c"]
+        args:
+          - |
+            import os
+            from huggingface_hub import snapshot_download
+            from sentence_transformers import SentenceTransformer
+            marker = '/app/model_cache/.download_complete'
+            if os.path.exists(marker):
+                print('Models already cached, skipping download.')
+            else:
+                os.makedirs('/app/model_cache', exist_ok=True)
+                print('Downloading TinyLlama...')
+                snapshot_download(repo_id='TinyLlama/TinyLlama-1.1B-Chat-v1.0', cache_dir='/app/model_cache')
+                print('Downloading embedding model...')
+                SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/model_cache')
+                open(marker, 'w').close()
+                print('Download complete.')
+        env:
+        - name: HF_HOME
+          value: /app/model_cache
+        - name: HUGGINGFACE_HUB_CACHE
+          value: /app/model_cache
+        volumeMounts:
+        - name: model-cache
+          mountPath: /app/model_cache
       containers:
       - name: backend
-        image: lawracle-backend:latest
+        image: adithya952/lawracle-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -30,8 +59,12 @@ spec:
         volumeMounts:
         - name: chroma-data
           mountPath: /app/chroma_db
-        # Model is baked into the Docker image via Dockerfile RUN step
+        - name: model-cache
+          mountPath: /app/model_cache
       volumes:
       - name: chroma-data
         persistentVolumeClaim:
           claimName: lawracle-chroma-pvc
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: lawracle-model-cache-pvc
