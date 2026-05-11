@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOCKER_REGISTRY = 'adithya952' // Replace with your dockerhub username
         APP_NAME_BACKEND = 'lawracle-backend'
