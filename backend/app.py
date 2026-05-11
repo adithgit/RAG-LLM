@@ -170,11 +170,12 @@ Keep your TOTAL response strictly under 150 words.
             torch_dtype=torch.float16,
         )
     else:
-        logger.warning("No GPU found! Loading model on CPU without quantization. This will be very slow and may crash if you lack sufficient RAM (16GB+ recommended).")
+        logger.warning("No GPU found! Loading model on CPU with float16 to reduce memory usage.")
         model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL_NAME,
             device_map="cpu",
-            torch_dtype=torch.float32,
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
         )
 
     embed_model = HuggingFaceEmbedding(
