@@ -240,8 +240,11 @@ def process_query():
         logger.error(f"Inference error: {str(e)}")
         return jsonify({"response": format_leap_response(query, "Unable to retrieve specific information.")})
 
+import threading
+
+# Start initialization in background so Gunicorn binds instantly and doesn't timeout
+threading.Thread(target=setup_rag_system, daemon=True).start()
+
 if __name__ == '__main__':
-    # Init system before handling requests
-    setup_rag_system()
     # In production, use Gunicorn instead of app.run
-    app.run(host='0.0.0.0', port=5001, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, use_reloader=False)
