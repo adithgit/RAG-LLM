@@ -1,9 +1,9 @@
 ---
 - name: Deploy Lawracle MLOps Pipeline to Kubernetes
   hosts: k8s_master
-  become: yes
+  become: no
   vars:
-    k8s_dir: "/opt/lawracle/k8s"
+    k8s_dir: "/tmp/lawracle_k8s_{{ ansible_user_id }}"
     # These vars should be passed by Jenkins:
     # backend_image: "johndoe/lawracle-backend:latest"
     # frontend_image: "johndoe/lawracle-frontend:latest"
@@ -21,23 +21,35 @@
         dest: "{{ k8s_dir }}/"
 
     - name: Apply Persistent Volume Claims
-      command: kubectl apply -f {{ k8s_dir }}/volumes.yaml
+      command: kubectl apply --validate=false -f {{ k8s_dir }}/volumes.yaml
+      register: apply_pvc
+      until: apply_pvc.rc == 0
+      retries: 5
+      delay: 10
 
     - name: Update backend deployment image
-      shell: |
-        sed -i 's|image: lawracle-backend:latest|image: {{ backend_image }}|g' {{ k8s_dir }}/backend-deployment.yaml
+      replace:
+        path: "{{ k8s_dir }}/backend-deployment.yaml"
+        regexp: 'image: lawracle-backend:latest'
+        replace: 'image: {{ backend_image }}'
       when: backend_image is defined
 
     - name: Update frontend deployment image
-      shell: |
-        sed -i 's|image: lawracle-frontend:latest|image: {{ frontend_image }}|g' {{ k8s_dir }}/frontend-deployment.yaml
+      replace:
+        path: "{{ k8s_dir }}/frontend-deployment.yaml"
+        regexp: 'image: lawracle-frontend:latest'
+        replace: 'image: {{ frontend_image }}'
       when: frontend_image is defined
 
     - name: Apply Deployments and Services
-      command: kubectl apply -f {{ k8s_dir }}/backend-deployment.yaml -f {{ k8s_dir }}/frontend-deployment.yaml -f {{ k8s_dir }}/services.yaml
+      command: kubectl apply --validate=false -f {{ k8s_dir }}/backend-deployment.yaml -f {{ k8s_dir }}/frontend-deployment.yaml -f {{ k8s_dir }}/services.yaml
+      register: apply_deploy
+      until: apply_deploy.rc == 0
+      retries: 5
+      delay: 10
 
-    - name: Wait for backend pods to be ready (may take time due to model loading)
-      command: kubectl wait --for=condition=ready pod -l app=lawracle-backend --timeout=600s
+    - name: Wait for backend deployment to finish rolling update
+      command: kubectl rollout status deployment/lawracle-backend --timeout=600s
       
-    - name: Wait for frontend pods to be ready
-      command: kubectl wait --for=condition=ready pod -l app=lawracle-frontend --timeout=120s
+    - name: Wait for frontend deployment to finish rolling update
+      command: kubectl rollout status deployment/lawracle-frontend --timeout=120s

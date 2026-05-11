@@ -169,12 +169,20 @@ Keep your TOTAL response strictly under 150 words.
             device_map="auto",
             torch_dtype=torch.float16,
         )
+    elif torch.backends.mps.is_available():
+        logger.info("Apple Silicon GPU (MPS) detected! Using Metal for accelerated inference.")
+        model = AutoModelForCausalLM.from_pretrained(
+            LLM_MODEL_NAME,
+            device_map="mps",
+            torch_dtype=torch.float16,
+        )
     else:
-        logger.warning("No GPU found! Loading model on CPU without quantization. This will be very slow and may crash if you lack sufficient RAM (16GB+ recommended).")
+        logger.warning("No GPU found! Loading model on CPU with float16 to reduce memory usage.")
         model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL_NAME,
             device_map="cpu",
-            torch_dtype=torch.float32,
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
         )
 
     embed_model = HuggingFaceEmbedding(
@@ -187,7 +195,7 @@ Keep your TOTAL response strictly under 150 words.
         model=model,
         tokenizer=tokenizer,
         context_window=2048,
-        max_new_tokens=256,
+        max_new_tokens=100,
         query_wrapper_prompt=query_wrapper_prompt,
         generate_kwargs={"temperature": 0.2, "do_sample": True},
     )
@@ -240,8 +248,11 @@ def process_query():
         logger.error(f"Inference error: {str(e)}")
         return jsonify({"response": format_leap_response(query, "Unable to retrieve specific information.")})
 
+import threading
+
+# Start initialization in background so Gunicorn binds instantly and doesn't timeout
+threading.Thread(target=setup_rag_system, daemon=True).start()
+
 if __name__ == '__main__':
-    # Init system before handling requests
-    setup_rag_system()
     # In production, use Gunicorn instead of app.run
     app.run(host='0.0.0.0', port=5000, use_reloader=False)

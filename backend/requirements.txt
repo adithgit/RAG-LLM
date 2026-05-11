@@ -4,7 +4,7 @@ gunicorn==21.2.0
 torch==2.2.1
 transformers==4.41.2
 accelerate>=0.27.2
-bitsandbytes==0.43.1
+# bitsandbytes==0.43.1
 llama-index>=0.10.15
 llama-index-llms-huggingface>=0.1.4
 llama-index-embeddings-huggingface>=0.1.4

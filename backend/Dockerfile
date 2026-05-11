@@ -30,6 +30,7 @@ EXPOSE 5000
 ENV DATA_DIR=/app/data
 ENV CHROMA_DB_PATH=/app/chroma_db
 ENV HUGGINGFACE_HUB_CACHE=/app/model_cache
+ENV HF_HOME=/app/model_cache
 
 # Run the app with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "--workers", "1", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "900", "--workers", "1", "app:app"]

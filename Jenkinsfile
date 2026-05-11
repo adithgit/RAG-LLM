@@ -1,8 +1,12 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     environment {
-        DOCKER_REGISTRY = 'johndoe' // Replace with your dockerhub username
+        DOCKER_REGISTRY = 'adithya952' // Replace with your dockerhub username
         APP_NAME_BACKEND = 'lawracle-backend'
         APP_NAME_FRONTEND = 'lawracle-frontend'
         IMAGE_TAG = "${env.BUILD_ID}"
@@ -19,10 +23,15 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                            def customImage = docker.build("${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}")
-                            customImage.push()
-                            customImage.push('latest')
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                            sh """
+                            eval \$(minikube docker-env)
+                            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} .
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}
+                            docker tag ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
+                            """
                         }
                     }
                 }
@@ -33,10 +42,15 @@ pipeline {
             steps {
                 script {
                     dir('frontend') {
-                        docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                            def customImage = docker.build("${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}")
-                            customImage.push()
-                            customImage.push('latest')
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                            sh """
+                            eval \$(minikube docker-env)
+                            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} .
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}
+                            docker tag ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest
+                            """
                         }
                     }
                 }
@@ -47,14 +61,11 @@ pipeline {
             steps {
                 script {
                     dir('ansible') {
-                        ansiblePlaybook(
-                            playbook: 'deploy.yml',
-                            inventory: 'inventory.ini',
-                            extraVars: [
-                                backend_image: "${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}",
-                                frontend_image: "${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}"
-                            ]
-                        )
+                        sh """
+                            ansible-playbook -i inventory.ini deploy.yml \\
+                                -e backend_image="${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}" \\
+                                -e frontend_image="${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}"
+                        """
                     }
                 }
             }

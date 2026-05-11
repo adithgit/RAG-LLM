@@ -470,14 +470,21 @@
         body: JSON.stringify({ query: q })
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        let errMsg = `HTTP ${res.status}`;
+        try { const errData = await res.json(); errMsg = errData.error || errMsg; } catch(e){}
+        if (res.status === 503) {
+           throw new Error("The AI model is currently downloading and initializing in the background. Please try again in 2-3 minutes!");
+        }
+        throw new Error(errMsg);
+      }
       const data = await res.json();
       removeTyping();
       addMessage('bot', data.response, true);
       setStatus(true);
     } catch (err) {
       removeTyping();
-      addMessage('bot', `<div class="bubble bot" style="color:#f87171;">⚠ Could not reach the API. Please check your URL in ⚙ Configure API.<br><small>${err.message}</small></div>`);
+      addMessage('bot', `<div class="bubble bot" style="color:#f87171;">⚠ API Error:<br><small>${err.message}</small></div>`);
       setStatus(false);
     }
 
