@@ -24,11 +24,14 @@ pipeline {
                 script {
                     dir('backend') {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                            sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                            sh "docker build -t ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} ."
-                            sh "docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}"
-                            sh "docker tag ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest"
-                            sh "docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest"
+                            sh """
+                            eval \$(minikube docker-env)
+                            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} .
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG}
+                            docker tag ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
+                            """
                         }
                     }
                 }
@@ -40,11 +43,14 @@ pipeline {
                 script {
                     dir('frontend') {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                            sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                            sh "docker build -t ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} ."
-                            sh "docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}"
-                            sh "docker tag ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest"
-                            sh "docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest"
+                            sh """
+                            eval \$(minikube docker-env)
+                            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} .
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG}
+                            docker tag ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest
+                            docker push ${DOCKER_REGISTRY}/${APP_NAME_FRONTEND}:latest
+                            """
                         }
                     }
                 }
