@@ -8,7 +8,7 @@ spec:
   ports:
     - protocol: TCP
       port: 5000
-      targetPort: 5001
+      targetPort: 5000
   type: LoadBalancer
 ---
 apiVersion: v1
