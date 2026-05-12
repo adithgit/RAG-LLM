@@ -3,7 +3,7 @@ Flask==3.0.3
 flask-cors==4.0.0
 gunicorn==21.2.0
 
-# ML / LLM
+# ML / LLM - pinned to avoid pip backtracking
 torch==2.2.1
 transformers==4.41.2
 accelerate==0.30.1
@@ -11,20 +11,17 @@ sentence-transformers==2.7.0
 tokenizers==0.19.1
 sentencepiece==0.2.0
 
-# huggingface-hub: must be >=0.23.0 (transformers 4.41.2 req) and provide [inference] extra
-# The [inference] extra was removed in v1.0.0, so we pin to last 0.23.x that has it
-huggingface-hub==0.23.4
+# huggingface-hub: must be >=0.23.0 (transformers 4.41.2 needs it)
+# NOT pinned to 0.23.4 - let pip pick compatible version in >=0.23.0,<0.24.0
+huggingface-hub>=0.23.0,<0.24.0
 
-# LlamaIndex - exact pins to prevent resolver from exploring all versions
+# LlamaIndex - llms-huggingface 0.1.4 has a bugged huggingface-hub<0.21.0 constraint
+# so we skip it and use >=0.1.5 which relaxes that restriction
 llama-index==0.10.15
 llama-index-core==0.10.15
-# 0.2.x requires huggingface-hub[inference] + text-generation, pin both explicitly
-llama-index-llms-huggingface==0.2.0
-llama-index-embeddings-huggingface==0.2.3
-llama-index-vector-stores-chroma==0.1.10
-
-# text-generation is a direct dep of llama-index-llms-huggingface 0.2.x
-text-generation==0.7.0
+llama-index-llms-huggingface>=0.1.5,<0.3.0
+llama-index-embeddings-huggingface>=0.1.5,<0.3.0
+llama-index-vector-stores-chroma>=0.1.4,<0.2.0
 
 # Vector DB
 chromadb==0.4.24
@@ -32,7 +29,7 @@ chromadb==0.4.24
 # PDF parsing
 PyMuPDF==1.23.26
 
-# LangChain
+# LangChain (used by some llama-index integrations)
 langchain-community==0.0.24
 
 # Logstash logging

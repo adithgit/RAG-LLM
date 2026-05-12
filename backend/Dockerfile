@@ -14,17 +14,9 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Install heavy ML packages first (cached unless requirements.txt changes)
+# Copy and install requirements (all pinned - fast resolver, no backtracking)
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir torch==2.2.1 transformers==4.41.2 accelerate \
-    llama-index>=0.10.15 llama-index-llms-huggingface>=0.1.4 \
-    llama-index-embeddings-huggingface>=0.1.4 chromadb==0.4.24 \
-    llama-index-vector-stores-chroma>=0.1.4 PyMuPDF>=1.23.26 \
-    langchain-community>=0.0.24 sentencepiece>=0.2.0 sentence-transformers
-
-# Install lightweight app packages (changes more often - separate layer)
-COPY requirements-app.txt .
-RUN pip3 install --no-cache-dir -r requirements-app.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app.py .

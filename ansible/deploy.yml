@@ -62,17 +62,10 @@
       delay: 10
 
     - name: Wait for Elasticsearch to be ready
-      command: kubectl rollout status deployment/elasticsearch -n logging --timeout=600s
+      command: kubectl rollout status deployment/elasticsearch -n logging --timeout=300s
 
     - name: Wait for Logstash to be ready
       command: kubectl rollout status deployment/logstash -n logging --timeout=300s
 
-    - name: Check if Kibana deployment exists
-      command: kubectl get deployment kibana -n logging
-      register: kibana_deployment_check
-      changed_when: false
-      failed_when: false
-
-    - name: Wait for Kibana to be ready (if deployed)
+    - name: Wait for Kibana to be ready
       command: kubectl rollout status deployment/kibana -n logging --timeout=300s
-      when: kibana_deployment_check.rc == 0

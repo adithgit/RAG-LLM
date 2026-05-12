@@ -61,8 +61,6 @@ spec:
           value: "logstash.logging.svc.cluster.local"
         - name: LOGSTASH_PORT
           value: "5044"
-        - name: ANONYMIZED_TELEMETRY
-          value: "False"
         volumeMounts:
         - name: chroma-data
           mountPath: /app/chroma_db
