@@ -13,3 +13,4 @@ llama-index-vector-stores-chroma>=0.1.4
 PyMuPDF>=1.23.26
 langchain-community>=0.0.24
 sentencepiece>=0.2.0
+python-logstash-async>=2.5.0

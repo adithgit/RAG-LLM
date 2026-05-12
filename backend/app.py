@@ -33,7 +33,22 @@ class JsonFormatter(logging.Formatter):
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(JsonFormatter())
-logging.basicConfig(level=logging.INFO, handlers=[handler])
+handlers = [handler]
+
+# Ship logs directly to Logstash via TCP if available
+LOGSTASH_HOST = os.getenv('LOGSTASH_HOST', '')
+LOGSTASH_PORT = int(os.getenv('LOGSTASH_PORT', '5044'))
+if LOGSTASH_HOST:
+    try:
+        from logstash_async.handler import AsynchronousLogstashHandler
+        logstash_handler = AsynchronousLogstashHandler(
+            LOGSTASH_HOST, LOGSTASH_PORT, database_path=None
+        )
+        handlers.append(logstash_handler)
+    except Exception as e:
+        print(f"Warning: Could not connect to Logstash at {LOGSTASH_HOST}:{LOGSTASH_PORT} - {e}")
+
+logging.basicConfig(level=logging.INFO, handlers=handlers)
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 

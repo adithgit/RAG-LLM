@@ -14,46 +14,19 @@ data:
 
   lawracle.conf: |
     input {
-      beats {
+      tcp {
         port => 5044
+        codec => json_lines
       }
     }
 
     filter {
-      # Parse JSON logs from the backend
-      if [message] =~ /^\{/ {
-        json {
-          source => "message"
-          target => "parsed"
-        }
-        mutate {
-          add_field => {
-            "log_level"   => "%{[parsed][level]}"
-            "log_service" => "%{[parsed][service]}"
-            "log_message" => "%{[parsed][message]}"
-          }
-          remove_field => ["message"]
-        }
-      }
-
-      # Add Kubernetes metadata fields to top level
-      if [kubernetes] {
-        mutate {
-          add_field => {
-            "pod_name"      => "%{[kubernetes][pod][name]}"
-            "namespace"     => "%{[kubernetes][namespace]}"
-            "container"     => "%{[kubernetes][container][name]}"
-          }
-        }
-      }
-
-      # Tag slow queries (inference took a response)
-      if [log_message] =~ /Query received/ {
+      # Tag queries for easy filtering in Kibana
+      if [message] =~ /Query received/ {
         mutate { add_tag => ["query"] }
       }
-
       # Tag errors
-      if [log_level] == "ERROR" {
+      if [level] == "ERROR" {
         mutate { add_tag => ["error"] }
       }
     }
@@ -63,8 +36,6 @@ data:
         hosts => ["http://elasticsearch:9200"]
         index => "lawracle-%{+YYYY.MM.dd}"
       }
-      # Uncomment to also print to stdout for debugging:
-      # stdout { codec => rubydebug }
     }
 ---
 apiVersion: apps/v1

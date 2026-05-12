@@ -56,6 +56,11 @@ spec:
           requests:
             memory: "10Mi"
             cpu: "10m"
+        env:
+        - name: LOGSTASH_HOST
+          value: "logstash.logging.svc.cluster.local"
+        - name: LOGSTASH_PORT
+          value: "5044"
         volumeMounts:
         - name: chroma-data
           mountPath: /app/chroma_db
