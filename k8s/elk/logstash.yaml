@@ -18,9 +18,18 @@ data:
         port => 5044
         codec => json_lines
       }
+      syslog {
+        port => 5045
+      }
     }
 
     filter {
+      if [program] == "nginx" {
+        json {
+          source => "message"
+        }
+      }
+
       # Tag queries for easy filtering in Kibana
       if [message] =~ /Query received/ {
         mutate { add_tag => ["query"] }
@@ -61,6 +70,8 @@ spec:
         ports:
         - containerPort: 5044
           name: beats
+        - containerPort: 5045
+          name: syslog
         - containerPort: 9600
           name: http
         env:
@@ -100,6 +111,9 @@ spec:
   - name: beats
     port: 5044
     targetPort: 5044
+  - name: syslog
+    port: 5045
+    targetPort: 5045
   - name: http
     port: 9600
     targetPort: 9600
