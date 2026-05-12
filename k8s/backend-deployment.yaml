@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
       - name: model-downloader
-        image: adithya952/lawracle-backend:latest
+        image: jman003/lawracle-backend:latest
         imagePullPolicy: Always
         command: ["python3", "-c"]
         args:
@@ -45,7 +45,7 @@ spec:
           mountPath: /app/model_cache
       containers:
       - name: backend
-        image: adithya952/lawracle-backend:latest
+        image: jman003/lawracle-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
