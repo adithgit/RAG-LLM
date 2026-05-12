@@ -56,13 +56,8 @@ data:
       - add_cloud_metadata:
       - add_host_metadata:
 
-    output.elasticsearch:
-      hosts: ["http://elasticsearch.logging.svc.cluster.local:9200"]
-      index: "lawracle-logs-%{+yyyy.MM.dd}"
-
-    setup.ilm.enabled: false
-    setup.template.name: "lawracle"
-    setup.template.pattern: "lawracle-*"
+    output.logstash:
+      hosts: ["logstash.logging.svc.cluster.local:5044"]
 
     logging.level: warning
 ---

@@ -64,5 +64,8 @@
     - name: Wait for Elasticsearch to be ready
       command: kubectl rollout status deployment/elasticsearch -n logging --timeout=300s
 
+    - name: Wait for Logstash to be ready
+      command: kubectl rollout status deployment/logstash -n logging --timeout=300s
+
     - name: Wait for Kibana to be ready
       command: kubectl rollout status deployment/kibana -n logging --timeout=300s
