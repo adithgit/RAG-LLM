@@ -7,7 +7,8 @@ import gc
 import torch
 import logging
 import sys
-from flask import Flask, request, jsonify
+import time
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 
 from llama_index.core import VectorStoreIndex, Document, Settings, StorageContext
@@ -30,8 +31,23 @@ class JsonFormatter(logging.Formatter):
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
-            "service": "lawracle-backend",
+            "service": getattr(record, 'service', "lawracle-backend"),
         }
+        
+        # Merge any extra kwargs passed to the logger (like our request details)
+        if hasattr(record, 'method'):
+            log_record['method'] = record.method
+        if hasattr(record, 'path'):
+            log_record['path'] = record.path
+        if hasattr(record, 'status'):
+            log_record['status'] = record.status
+        if hasattr(record, 'duration_ms'):
+            log_record['duration_ms'] = record.duration_ms
+        if hasattr(record, 'client_ip'):
+            log_record['client_ip'] = record.client_ip
+        if hasattr(record, 'query_text'):
+            log_record['query_text'] = record.query_text
+            
         if record.exc_info:
             log_record["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_record)
@@ -49,6 +65,8 @@ if LOGSTASH_HOST and os.getenv('LOGSTASH_DISABLE', '').lower() not in ('1', 'tru
         logstash_handler = AsynchronousLogstashHandler(
             LOGSTASH_HOST, LOGSTASH_PORT, database_path=None
         )
+        # Fix: Apply the custom JSON formatter to the Logstash connection
+        logstash_handler.setFormatter(JsonFormatter())
         handlers.append(logstash_handler)
     except Exception as e:
         print(f"Warning: Could not connect to Logstash at {LOGSTASH_HOST}:{LOGSTASH_PORT} - {e}")
@@ -59,6 +77,46 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
+
+# --- MIDDLEWARE FOR REQUEST/RESPONSE LOGGING ---
+@app.before_request
+def start_timer():
+    # Start a stopwatch the moment the request hits the server
+    g.start_time = time.time()
+
+@app.after_request
+def log_request_response(response):
+    # Calculate how long the request took
+    duration = time.time() - g.start_time if hasattr(g, 'start_time') else 0
+
+    # Skip logging for the /health endpoint to avoid spamming Kibana
+    if request.path == '/health':
+        return response
+
+    # Gather all the request and response details
+    log_data = {
+        "method": request.method,
+        "path": request.path,
+        "status": response.status_code,
+        "duration_ms": round(duration * 1000, 2),
+        "client_ip": request.remote_addr,
+    }
+
+    # If you want to log the specific question the user asked
+    if request.path == '/query' and request.is_json:
+        try:
+            # Safely try to get the query without breaking the request
+            log_data["query_text"] = request.get_json(silent=True).get('query', '')
+        except Exception:
+            pass
+
+    # Log as an error if it's a 4xx or 5xx status code
+    if response.status_code >= 400:
+        logger.error(f"{request.method} {request.path} failed", extra=log_data)
+    else:
+        logger.info(f"{request.method} {request.path} completed", extra=log_data)
+
+    return response
 
 # Environment paths for containerized deployment
 DATA_DIR = os.getenv('DATA_DIR', './data')
@@ -278,15 +336,23 @@ def process_query():
         return jsonify({"error": "No query provided"}), 400
 
     query = data['query']
-    logger.info(f"Query received: {query}")
-
+    
     try:
         raw_response = query_engine.query(query)
         formatted_response = format_leap_response(query, str(raw_response))
         return jsonify({"response": formatted_response})
     except Exception as e:
-        logger.error(f"Inference error: {str(e)}")
-        return jsonify({"response": format_leap_response(query, "Unable to retrieve specific information.")})
+        # We don't need logger.error here since the @app.after_request middleware 
+        # will catch the 500 error and log it automatically!
+        return jsonify({"response": format_leap_response(query, "Unable to retrieve specific information.")}), 500
+
+# Endpoint to capture logs sent from the frontend UI
+@app.route('/log', methods=['POST'])
+def receive_frontend_log():
+    data = request.json
+    # Log it as an error, but let Kibana know it came from the frontend UI
+    logger.error(f"Frontend UI Error: {data.get('message')}", extra={"service": "lawracle-frontend-ui"})
+    return jsonify({"status": "logged"})
 
 import threading
 
