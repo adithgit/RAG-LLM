@@ -16,7 +16,9 @@ WORKDIR /app
 
 # Copy and install requirements (all pinned - fast resolver, no backtracking)
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir --retries 5 --timeout 120 -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --retries 5 --timeout 300 --index-url https://download.pytorch.org/whl/cpu torch==2.2.1 && \
+    pip3 install --retries 5 --timeout 300 -r requirements.txt
 
 # Copy application code
 COPY app.py .
