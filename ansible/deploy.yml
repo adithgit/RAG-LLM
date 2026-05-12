@@ -53,3 +53,16 @@
       
     - name: Wait for frontend deployment to finish rolling update
       command: kubectl rollout status deployment/lawracle-frontend --timeout=120s
+
+    - name: Deploy ELK Stack - Create logging namespace and apply manifests
+      command: kubectl apply --validate=false -f {{ k8s_dir }}/elk/
+      register: apply_elk
+      until: apply_elk.rc == 0
+      retries: 5
+      delay: 10
+
+    - name: Wait for Elasticsearch to be ready
+      command: kubectl rollout status deployment/elasticsearch -n logging --timeout=300s
+
+    - name: Wait for Kibana to be ready
+      command: kubectl rollout status deployment/kibana -n logging --timeout=300s
