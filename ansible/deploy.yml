@@ -30,7 +30,7 @@
     - name: Update backend deployment image
       replace:
         path: "{{ k8s_dir }}/backend-deployment.yaml"
-        regexp: 'image: lawracle-backend:latest'
+        regexp: 'image: .*lawracle-backend:.*'
         replace: 'image: {{ backend_image }}'
       when: backend_image is defined
 

@@ -15,13 +15,13 @@ sentencepiece==0.2.0
 # NOT pinned to 0.23.4 - let pip pick compatible version in >=0.23.0,<0.24.0
 huggingface-hub>=0.23.0,<0.24.0
 
-# LlamaIndex - llms-huggingface 0.1.4 has a bugged huggingface-hub<0.21.0 constraint
-# so we skip it and use >=0.1.5 which relaxes that restriction
-llama-index==0.10.15
-llama-index-core==0.10.15
-llama-index-llms-huggingface>=0.1.5,<0.3.0
-llama-index-embeddings-huggingface>=0.1.5,<0.3.0
-llama-index-vector-stores-chroma>=0.1.4,<0.2.0
+# LlamaIndex packages must stay on the same 0.10.x line. Older core builds miss
+# symbols imported by the HuggingFace integration, and loose ranges drift apart.
+llama-index==0.10.68
+llama-index-core==0.10.68
+llama-index-llms-huggingface==0.2.8
+llama-index-embeddings-huggingface==0.2.3
+llama-index-vector-stores-chroma==0.1.10
 
 # Vector DB
 chromadb==0.4.24
