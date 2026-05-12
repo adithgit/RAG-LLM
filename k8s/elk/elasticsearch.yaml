@@ -3,6 +3,21 @@ kind: Namespace
 metadata:
   name: logging
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: elasticsearch-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: lawracle-local
+  hostPath:
+    path: /tmp/lawracle-elasticsearch-data
+    type: DirectoryOrCreate
+---
 # Persistent storage for Elasticsearch data
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -10,6 +25,8 @@ metadata:
   name: elasticsearch-pvc
   namespace: logging
 spec:
+  storageClassName: lawracle-local
+  volumeName: elasticsearch-pv
   accessModes:
     - ReadWriteOnce
   resources:
@@ -51,6 +68,8 @@ spec:
           value: single-node
         - name: ES_JAVA_OPTS
           value: "-Xms512m -Xmx512m"
+        - name: node.store.allow_mmap
+          value: "false"
         - name: xpack.security.enabled
           value: "false"
         - name: xpack.security.http.ssl.enabled
