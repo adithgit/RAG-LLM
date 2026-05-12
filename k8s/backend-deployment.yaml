@@ -43,6 +43,13 @@ spec:
         volumeMounts:
         - name: model-cache
           mountPath: /app/model_cache
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
       containers:
       - name: backend
         image: adithya952/lawracle-backend:latest
@@ -51,11 +58,11 @@ spec:
         - containerPort: 5000
         resources:
           limits:
-            memory: "4Gi"
+            memory: "8Gi"
             cpu: "2"
           requests:
-            memory: "10Mi"
-            cpu: "10m"
+            memory: "4Gi"
+            cpu: "500m"
         env:
         - name: LOGSTASH_HOST
           value: "logstash.logging.svc.cluster.local"
