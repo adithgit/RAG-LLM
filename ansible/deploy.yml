@@ -52,7 +52,7 @@
       command: kubectl rollout status deployment/lawracle-backend --timeout=600s
       
     - name: Wait for frontend deployment to finish rolling update
-      command: kubectl rollout status deployment/lawracle-frontend --timeout=120s
+      command: kubectl rollout status deployment/lawracle-frontend --timeout=600s
 
     - name: Check whether Elasticsearch PVC is stuck pending
       command: kubectl get pvc elasticsearch-pvc -n logging -o jsonpath={.status.phase}
