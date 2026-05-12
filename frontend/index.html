@@ -1,496 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lawracle – AI Legal Assistant</title>
-  <meta name="description" content="Lawracle is an AI-powered legal assistant providing expert insights on Indian law." />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <meta name="description"
+    content="Lawracle is an AI-powered legal assistant providing expert insights on Indian law." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:         #060b18;
-      --bg2:        #0d1526;
-      --bg3:        #111d35;
-      --gold:       #c9a227;
-      --gold-lt:    #e8c547;
-      --text:       #e8eaf0;
-      --text2:      #8896b0;
-      --border:     rgba(201,162,39,.18);
-      --user-bg:    #1b3358;
-      --radius:     14px;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+    :root {
+      --bg: #060b18;
+      --bg2: #0d1526;
+      --bg3: #111d35;
+      --gold: #c9a227;
+      --gold-lt: #e8c547;
+      --text: #e8eaf0;
+      --text2: #8896b0;
+      --border: rgba(201, 162, 39, .18);
+      --user-bg: #1b3358;
+      --radius: 14px;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
     /* ── HEADER ───────────────────────────────────────────────── */
     header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 28px; height: 64px;
-      background: rgba(6,11,24,.85); backdrop-filter: blur(14px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 64px;
+      background: rgba(6, 11, 24, .85);
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
-    .logo { display: flex; align-items: center; gap: 10px; }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .logo-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg,#c9a227,#7d6318);
-      display: flex; align-items: center; justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #c9a227, #7d6318);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 18px;
     }
-    .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
-      background: linear-gradient(90deg,#c9a227,#e8c547); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .logo-sub { font-size: 11px; color: var(--text2); margin-top: -2px; }
+
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c9a227, #e8c547);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: -2px;
+    }
 
     #status-dot {
-      width: 9px; height: 9px; border-radius: 50%; background: #ef4444;
-      box-shadow: 0 0 6px #ef4444; transition: all .4s;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+      transition: all .4s;
     }
-    #status-dot.connected { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-    .status-wrap { display: flex; align-items: center; gap: 8px; }
-    .status-label { font-size: 12px; color: var(--text2); }
 
-    #settings-btn {
-      background: none; border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text2); padding: 6px 12px; cursor: pointer; font-size: 13px;
-      transition: all .2s;
+    #status-dot.connected {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
     }
-    #settings-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-label {
+      font-size: 12px;
+      color: var(--text2);
+    }
 
     /* ── CHAT AREA ────────────────────────────────────────────── */
     #chat {
-      margin-top: 64px; margin-bottom: 80px; padding: 32px 0;
-      max-width: 820px; width: 100%; margin-left: auto; margin-right: auto;
-      min-height: calc(100vh - 144px); overflow-y: auto;
-      display: flex; flex-direction: column; gap: 24px; padding: 80px 16px 100px;
+      margin-top: 64px;
+      margin-bottom: 80px;
+      padding: 32px 0;
+      max-width: 820px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      min-height: calc(100vh - 144px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 80px 16px 100px;
     }
 
     /* ── WELCOME ──────────────────────────────────────────────── */
     #welcome {
-      text-align: center; padding: 48px 24px; animation: fadeUp .5s ease;
+      text-align: center;
+      padding: 48px 24px;
+      animation: fadeUp .5s ease;
     }
-    #welcome h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
-      background: linear-gradient(90deg,#c9a227,#e8c547); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #welcome p { color: var(--text2); margin-top: 10px; font-size: 15px; }
-    .examples { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 32px; max-width: 640px; margin-left: auto; margin-right: auto; }
+
+    #welcome h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c9a227, #e8c547);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #welcome p {
+      color: var(--text2);
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 32px;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .example-card {
-      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 14px 16px; cursor: pointer; text-align: left; font-size: 13px; color: var(--text2);
-      transition: all .2s; line-height: 1.5;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      color: var(--text2);
+      transition: all .2s;
+      line-height: 1.5;
     }
-    .example-card:hover { border-color: var(--gold); color: var(--text); transform: translateY(-2px); }
-    .example-card .ex-icon { font-size: 18px; margin-bottom: 6px; }
+
+    .example-card:hover {
+      border-color: var(--gold);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+
+    .example-card .ex-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
 
     /* ── MESSAGES ─────────────────────────────────────────────── */
-    .msg { display: flex; gap: 12px; animation: fadeUp .3s ease; }
-    .msg.user { flex-direction: row-reverse; }
+    .msg {
+      display: flex;
+      gap: 12px;
+      animation: fadeUp .3s ease;
+    }
+
+    .msg.user {
+      flex-direction: row-reverse;
+    }
 
     .avatar {
-      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
     }
-    .avatar.bot { background: linear-gradient(135deg,#c9a227,#7d6318); }
-    .avatar.user { background: var(--user-bg); border: 1px solid rgba(59,130,246,.4); }
+
+    .avatar.bot {
+      background: linear-gradient(135deg, #c9a227, #7d6318);
+    }
+
+    .avatar.user {
+      background: var(--user-bg);
+      border: 1px solid rgba(59, 130, 246, .4);
+    }
 
     .bubble {
-      max-width: 78%; border-radius: var(--radius); padding: 14px 18px;
-      font-size: 14px; line-height: 1.7;
+      max-width: 78%;
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.7;
     }
-    .bubble.user { background: var(--user-bg); border: 1px solid rgba(59,130,246,.25); text-align: right; }
-    .bubble.bot  { background: var(--bg3); border: 1px solid var(--border); }
+
+    .bubble.user {
+      background: var(--user-bg);
+      border: 1px solid rgba(59, 130, 246, .25);
+      text-align: right;
+    }
+
+    .bubble.bot {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+    }
 
     /* LEAP cards inside bot bubble */
-    .leap-section { margin-top: 12px; border-radius: 10px; overflow: hidden; }
-    .leap-section:first-child { margin-top: 0; }
-    .leap-header {
-      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+    .leap-section {
+      margin-top: 12px;
+      border-radius: 10px;
+      overflow: hidden;
     }
-    .leap-body { padding: 10px 12px; font-size: 13.5px; line-height: 1.7; color: var(--text); }
 
-    .leap-legal   .leap-header { background: rgba(201,162,39,.15); color: var(--gold); }
-    .leap-law     .leap-header { background: rgba(59,130,246,.12); color: #60a5fa; }
-    .leap-action  .leap-header { background: rgba(34,197,94,.1);  color: #4ade80; }
-    .leap-tips    .leap-header { background: rgba(168,85,247,.1); color: #c084fc; }
+    .leap-section:first-child {
+      margin-top: 0;
+    }
 
-    .leap-legal  { border: 1px solid rgba(201,162,39,.2); }
-    .leap-law    { border: 1px solid rgba(59,130,246,.2); }
-    .leap-action { border: 1px solid rgba(34,197,94,.15); }
-    .leap-tips   { border: 1px solid rgba(168,85,247,.15); }
+    .leap-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
 
-    ol, ul { padding-left: 18px; }
-    li { margin-bottom: 4px; }
+    .leap-body {
+      padding: 10px 12px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .leap-legal .leap-header {
+      background: rgba(201, 162, 39, .15);
+      color: var(--gold);
+    }
+
+    .leap-law .leap-header {
+      background: rgba(59, 130, 246, .12);
+      color: #60a5fa;
+    }
+
+    .leap-action .leap-header {
+      background: rgba(34, 197, 94, .1);
+      color: #4ade80;
+    }
+
+    .leap-tips .leap-header {
+      background: rgba(168, 85, 247, .1);
+      color: #c084fc;
+    }
+
+    .leap-legal {
+      border: 1px solid rgba(201, 162, 39, .2);
+    }
+
+    .leap-law {
+      border: 1px solid rgba(59, 130, 246, .2);
+    }
+
+    .leap-action {
+      border: 1px solid rgba(34, 197, 94, .15);
+    }
+
+    .leap-tips {
+      border: 1px solid rgba(168, 85, 247, .15);
+    }
+
+    ol,
+    ul {
+      padding-left: 18px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
 
     /* ── TYPING INDICATOR ─────────────────────────────────────── */
-    .typing { display: flex; align-items: center; gap: 5px; padding: 14px 18px; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); opacity: .4; animation: blink 1.2s infinite; }
-    .dot:nth-child(2) { animation-delay: .2s; }
-    .dot:nth-child(3) { animation-delay: .4s; }
-    @keyframes blink { 0%,80%,100% { opacity:.4; transform:scale(1); } 40% { opacity:1; transform:scale(1.3); } }
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: .4;
+      animation: blink 1.2s infinite;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes blink {
+
+      0%,
+      80%,
+      100% {
+        opacity: .4;
+        transform: scale(1);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.3);
+      }
+    }
 
     /* ── INPUT BAR ────────────────────────────────────────────── */
     #input-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(6,11,24,.92); backdrop-filter: blur(14px);
-      border-top: 1px solid var(--border); padding: 12px 16px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(6, 11, 24, .92);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
     }
+
     #input-wrap {
-      max-width: 820px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end;
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
     }
+
     #query-input {
-      flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
-      color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
-      padding: 12px 16px; resize: none; outline: none; max-height: 140px; min-height: 48px;
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 12px 16px;
+      resize: none;
+      outline: none;
+      max-height: 140px;
+      min-height: 48px;
       transition: border-color .2s;
     }
-    #query-input:focus { border-color: var(--gold); }
-    #query-input::placeholder { color: var(--text2); }
+
+    #query-input:focus {
+      border-color: var(--gold);
+    }
+
+    #query-input::placeholder {
+      color: var(--text2);
+    }
 
     #send-btn {
-      width: 48px; height: 48px; border-radius: 12px; border: none; cursor: pointer;
-      background: linear-gradient(135deg,#c9a227,#7d6318);
-      color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
-      transition: opacity .2s, transform .1s; flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #c9a227, #7d6318);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .2s, transform .1s;
+      flex-shrink: 0;
     }
-    #send-btn:hover { opacity: .88; }
-    #send-btn:active { transform: scale(.95); }
-    #send-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ── SETTINGS MODAL ───────────────────────────────────────── */
-    #modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
+    #send-btn:hover {
+      opacity: .88;
     }
-    #modal-overlay.open { display: flex; }
-    #modal {
-      background: var(--bg2); border: 1px solid var(--border); border-radius: 18px;
-      padding: 28px; width: 90%; max-width: 480px; animation: fadeUp .25s ease;
-    }
-    #modal h2 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px; }
-    #modal p { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
-    #modal label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 6px; }
-    #api-url-input {
-      width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
-      color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px;
-      padding: 10px 14px; outline: none; transition: border-color .2s;
-    }
-    #api-url-input:focus { border-color: var(--gold); }
-    .modal-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
-    .btn-cancel {
-      background: none; border: 1px solid var(--border); border-radius: 9px;
-      color: var(--text2); padding: 8px 18px; cursor: pointer; font-size: 13px; transition: all .2s;
-    }
-    .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
-    .btn-save {
-      background: linear-gradient(135deg,#c9a227,#7d6318); border: none; border-radius: 9px;
-      color: #fff; padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 600;
-      transition: opacity .2s;
-    }
-    .btn-save:hover { opacity: .85; }
 
-    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    #send-btn:active {
+      transform: scale(.95);
+    }
+
+    #send-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     /* ── DISCLAIMER ───────────────────────────────────────────── */
     .disclaimer {
-      text-align: center; font-size: 11px; color: var(--text2);
-      padding: 6px 0; max-width: 820px; margin: 0 auto;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text2);
+      padding: 6px 0;
+      max-width: 820px;
+      margin: 0 auto;
     }
   </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">
-    <div class="logo-icon">⚖️</div>
-    <div>
-      <div class="logo-text">Lawracle</div>
-      <div class="logo-sub">AI Legal Assistant · Indian Law</div>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚖️</div>
+      <div>
+        <div class="logo-text">Lawracle</div>
+        <div class="logo-sub">AI Legal Assistant · Indian Law</div>
+      </div>
     </div>
-  </div>
-  <div style="display:flex;align-items:center;gap:16px;">
     <div class="status-wrap">
       <div id="status-dot"></div>
-      <span class="status-label" id="status-label">Not connected</span>
+      <span class="status-label" id="status-label">Checking System...</span>
     </div>
-    <button id="settings-btn" onclick="openModal()">⚙ Configure API</button>
-  </div>
-</header>
+  </header>
 
-<!-- CHAT -->
-<div id="chat">
-  <div id="welcome">
-    <h1>Lawracle</h1>
-    <p>Ask any question about Indian law — powered by Mistral-7B + RAG</p>
-    <div class="examples">
-      <div class="example-card" onclick="useExample(this)">
-        <div class="ex-icon">📋</div>
-        My business partner's cheque of ₹50,000 bounced. What can I do?
-      </div>
-      <div class="example-card" onclick="useExample(this)">
-        <div class="ex-icon">💍</div>
-        Can I get a divorce under the Hindu Marriage Act after 3 years of separation?
-      </div>
-      <div class="example-card" onclick="useExample(this)">
-        <div class="ex-icon">🚗</div>
-        I was hit by a car while crossing the road and the driver fled. What are my rights?
-      </div>
-      <div class="example-card" onclick="useExample(this)">
-        <div class="ex-icon">⚖️</div>
-        What is the punishment for causing grievous hurt under the Bharatiya Nyaya Sanhita?
+  <div id="chat">
+    <div id="welcome">
+      <h1>Lawracle</h1>
+      <p>Ask any question about Indian law — powered by Mistral-7B + RAG</p>
+      <div class="examples">
+        <div class="example-card" onclick="useExample(this)">
+          <div class="ex-icon">📋</div>
+          My business partner's cheque of ₹50,000 bounced. What can I do?
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <div class="ex-icon">💍</div>
+          Can I get a divorce under the Hindu Marriage Act after 3 years of separation?
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <div class="ex-icon">🚗</div>
+          I was hit by a car while crossing the road and the driver fled. What are my rights?
+        </div>
+        <div class="example-card" onclick="useExample(this)">
+          <div class="ex-icon">⚖️</div>
+          What is the punishment for causing grievous hurt under the Bharatiya Nyaya Sanhita?
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- INPUT BAR -->
-<div id="input-bar">
-  <div id="input-wrap">
-    <textarea id="query-input" rows="1" placeholder="Ask a legal question…"></textarea>
-    <button id="send-btn" onclick="sendQuery()">➤</button>
-  </div>
-  <div class="disclaimer">Lawracle provides general legal information, not legal advice. Always consult a qualified lawyer for your specific situation.</div>
-</div>
-
-<!-- SETTINGS MODAL -->
-<div id="modal-overlay" onclick="handleOverlayClick(event)">
-  <div id="modal">
-    <h2>⚙ API Configuration</h2>
-    <p>Enter your current localtunnel or ngrok URL from Kaggle. This changes every session.</p>
-    <label for="api-url-input">API Base URL</label>
-    <input id="api-url-input" type="text" placeholder="https://xxxx.loca.lt" />
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveApiUrl()">Save & Test</button>
+  <div id="input-bar">
+    <div id="input-wrap">
+      <textarea id="query-input" rows="1" placeholder="Ask a legal question…"></textarea>
+      <button id="send-btn" onclick="sendQuery()">➤</button>
     </div>
+    <div class="disclaimer">Lawracle provides general legal information, not legal advice. Always consult a qualified
+      lawyer for your specific situation.</div>
   </div>
-</div>
 
-<script>
-  let API_URL = localStorage.getItem('lawracle_api') || '';
-  const chat  = document.getElementById('chat');
-  const input = document.getElementById('query-input');
-  const sendBtn = document.getElementById('send-btn');
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('query-input');
+    const sendBtn = document.getElementById('send-btn');
 
-  // ── Auto-resize textarea ──────────────────────────────────────
-  input.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 140) + 'px';
-  });
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
-  });
+    // ── Auto-resize textarea ──────────────────────────────────────
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+    });
 
-  // ── Status ────────────────────────────────────────────────────
-  function setStatus(connected) {
-    const dot = document.getElementById('status-dot');
-    const lbl = document.getElementById('status-label');
-    if (connected) { dot.classList.add('connected'); lbl.textContent = 'API connected'; }
-    else           { dot.classList.remove('connected'); lbl.textContent = 'Not connected'; }
-  }
-  if (API_URL) testConnection();
-
-  async function testConnection() {
-    try {
-      const r = await fetch(API_URL + '/health', {
-        method: 'GET',
-        headers: { 'bypass-tunnel-reminder': 'true' }
-      });
-      setStatus(r.ok);
-    } catch { setStatus(false); }
-  }
-
-  // ── Modal ─────────────────────────────────────────────────────
-  function openModal() {
-    document.getElementById('api-url-input').value = API_URL;
-    document.getElementById('modal-overlay').classList.add('open');
-  }
-  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-  function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
-
-  async function saveApiUrl() {
-    let url = document.getElementById('api-url-input').value.trim();
-    // Strip trailing slashes and also remove /query if the user pasted the full endpoint
-    url = url.replace(/\/+$/, '').replace(/\/query$/, '');
-    
-    if (!url) {
-      alert("Please enter a URL first.");
-      return;
-    }
-    
-    API_URL = url;
-    localStorage.setItem('lawracle_api', API_URL);
-    
-    const btn = document.querySelector('.btn-save');
-    btn.textContent = 'Testing...';
-    btn.disabled = true;
-    
-    // We wait for the test to finish
-    await testConnection();
-    
-    btn.textContent = 'Save & Test';
-    btn.disabled = false;
-    
-    // Check if it actually connected
-    if (document.getElementById('status-label').textContent === 'API connected') {
-      closeModal();
-      alert("Successfully connected to Lawracle API!");
-    } else {
-      alert("Could not connect to the API. Make sure your URL is correct.\n\nNote: If you are using localtunnel, try opening " + API_URL + " in a new tab first and clicking 'Click to Continue', then come back here and try again.");
-    }
-  }
-
-  // ── Example queries ───────────────────────────────────────────
-  function useExample(el) {
-    input.value = el.innerText.replace(/^.*\n/, '').trim();
-    input.dispatchEvent(new Event('input'));
-    input.focus();
-  }
-
-  // ── Parse LEAP response ───────────────────────────────────────
-  function parseLEAP(text) {
-    // Strip **bold** markers
-    text = text.replace(/\*\*(.*?)\*\*/g, '$1');
-
-    const get = (pattern, str) => {
-      const m = str.match(pattern);
-      return m ? m[1].trim() : null;
-    };
-
-    const legalIssue   = get(/Legal Issue\s*[:\-]\s*([\s\S]*?)(?=Explanation of Law|$)/i, text);
-    const explanation  = get(/Explanation of Law\s*[:\-]\s*([\s\S]*?)(?=Action Steps|$)/i, text);
-    const actionSteps  = get(/Action Steps\s*[:\-]\s*([\s\S]*?)(?=Practical Guidance|$)/i, text);
-    const guidance     = get(/Practical Guidance\s*[:\-]\s*([\s\S]*?)$/i, text);
-
-    return { legalIssue, explanation, actionSteps, guidance };
-  }
-
-  function formatText(t) {
-    if (!t) return '';
-    // Convert numbered/bullet list items
-    return t
-      .replace(/^\d+\.\s+/gm, '<br>• ')
-      .replace(/\n{2,}/g, '<br><br>')
-      .replace(/\n/g, '<br>')
-      .replace(/^<br>/, '');
-  }
-
-  function buildBotBubble(raw) {
-    const { legalIssue, explanation, actionSteps, guidance } = parseLEAP(raw);
-    const hasLEAP = legalIssue || explanation || actionSteps || guidance;
-
-    if (!hasLEAP) {
-      return `<div class="bubble bot">${formatText(raw)}</div>`;
+    // ── Status Check (Automatically runs on load) ───────────────────
+    function setStatus(connected) {
+      const dot = document.getElementById('status-dot');
+      const lbl = document.getElementById('status-label');
+      if (connected) { dot.classList.add('connected'); lbl.textContent = 'System Online'; }
+      else { dot.classList.remove('connected'); lbl.textContent = 'System Offline'; }
     }
 
-    const sec = (cls, icon, title, content) => content ? `
+    async function testConnection() {
+      try {
+        // Calls relative API path handled by Nginx proxy
+        const r = await fetch('/api/health');
+        setStatus(r.ok);
+      } catch { setStatus(false); }
+    }
+
+    testConnection();
+
+    // ── Example queries ───────────────────────────────────────────
+    function useExample(el) {
+      input.value = el.innerText.replace(/^.*\n/, '').trim();
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    }
+
+    // ── Parse LEAP response ───────────────────────────────────────
+    function parseLEAP(text) {
+      text = text.replace(/\*\*(.*?)\*\*/g, '$1');
+      const get = (pattern, str) => {
+        const m = str.match(pattern);
+        return m ? m[1].trim() : null;
+      };
+      const legalIssue = get(/Legal Issue\s*[:\-]\s*([\s\S]*?)(?=Explanation of Law|$)/i, text);
+      const explanation = get(/Explanation of Law\s*[:\-]\s*([\s\S]*?)(?=Action Steps|$)/i, text);
+      const actionSteps = get(/Action Steps\s*[:\-]\s*([\s\S]*?)(?=Practical Guidance|$)/i, text);
+      const guidance = get(/Practical Guidance\s*[:\-]\s*([\s\S]*?)$/i, text);
+      return { legalIssue, explanation, actionSteps, guidance };
+    }
+
+    function formatText(t) {
+      if (!t) return '';
+      return t.replace(/^\d+\.\s+/gm, '<br>• ').replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>').replace(/^<br>/, '');
+    }
+
+    function buildBotBubble(raw) {
+      const { legalIssue, explanation, actionSteps, guidance } = parseLEAP(raw);
+      const hasLEAP = legalIssue || explanation || actionSteps || guidance;
+
+      if (!hasLEAP) {
+        return `<div class="bubble bot">${formatText(raw)}</div>`;
+      }
+
+      const sec = (cls, icon, title, content) => content ? `
       <div class="leap-section ${cls}">
         <div class="leap-header">${icon} ${title}</div>
         <div class="leap-body">${formatText(content)}</div>
       </div>` : '';
 
-    return `<div class="bubble bot" style="padding:14px;display:flex;flex-direction:column;gap:10px;">
-      ${sec('leap-legal',  '⚖️', 'Legal Issue',       legalIssue)}
-      ${sec('leap-law',    '📘', 'Explanation of Law', explanation)}
-      ${sec('leap-action', '✅', 'Action Steps',       actionSteps)}
-      ${sec('leap-tips',   '💡', 'Practical Guidance', guidance)}
+      return `<div class="bubble bot" style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+      ${sec('leap-legal', '⚖️', 'Legal Issue', legalIssue)}
+      ${sec('leap-law', '📘', 'Explanation of Law', explanation)}
+      ${sec('leap-action', '✅', 'Action Steps', actionSteps)}
+      ${sec('leap-tips', '💡', 'Practical Guidance', guidance)}
     </div>`;
-  }
-
-  // ── Add messages ──────────────────────────────────────────────
-  function addMessage(role, content, isRaw = false) {
-    // Hide welcome screen on first message
-    const welcome = document.getElementById('welcome');
-    if (welcome) welcome.remove();
-
-    const wrap = document.createElement('div');
-    wrap.className = `msg ${role}`;
-
-    const av = document.createElement('div');
-    av.className = `avatar ${role}`;
-    av.textContent = role === 'user' ? '👤' : '⚖️';
-
-    const bubble = document.createElement('div');
-    if (role === 'user') {
-      bubble.className = 'bubble user';
-      bubble.textContent = content;
-    } else {
-      bubble.innerHTML = isRaw ? buildBotBubble(content) : content;
     }
 
-    wrap.appendChild(av);
-    wrap.appendChild(bubble);
-    chat.appendChild(wrap);
-    chat.scrollTop = chat.scrollHeight;
-    return wrap;
-  }
+    // ── Add messages ──────────────────────────────────────────────
+    function addMessage(role, content, isRaw = false) {
+      const welcome = document.getElementById('welcome');
+      if (welcome) welcome.remove();
 
-  function addTyping() {
-    const wrap = document.createElement('div');
-    wrap.className = 'msg bot';
-    wrap.id = 'typing-indicator';
-    wrap.innerHTML = `
-      <div class="avatar bot">⚖️</div>
-      <div class="bubble bot">
-        <div class="typing">
-          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-      </div>`;
-    chat.appendChild(wrap);
-    chat.scrollTop = chat.scrollHeight;
-  }
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
 
-  function removeTyping() {
-    const t = document.getElementById('typing-indicator');
-    if (t) t.remove();
-  }
+      const av = document.createElement('div');
+      av.className = `avatar ${role}`;
+      av.textContent = role === 'user' ? '👤' : '⚖️';
 
-  // ── Send query ────────────────────────────────────────────────
-  async function sendQuery() {
-    const q = input.value.trim();
-    if (!q) return;
-    if (!API_URL) { openModal(); return; }
-
-    input.value = '';
-    input.style.height = 'auto';
-    sendBtn.disabled = true;
-
-    addMessage('user', q);
-    addTyping();
-
-    try {
-      const res = await fetch(API_URL + '/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'bypass-tunnel-reminder': 'true'
-        },
-        body: JSON.stringify({ query: q })
-      });
-
-      if (!res.ok) {
-        let errMsg = `HTTP ${res.status}`;
-        try { const errData = await res.json(); errMsg = errData.error || errMsg; } catch(e){}
-        if (res.status === 503) {
-           throw new Error("The AI model is currently downloading and initializing in the background. Please try again in 2-3 minutes!");
-        }
-        throw new Error(errMsg);
+      const bubble = document.createElement('div');
+      if (role === 'user') {
+        bubble.className = 'bubble user';
+        bubble.textContent = content;
+      } else {
+        bubble.innerHTML = isRaw ? buildBotBubble(content) : content;
       }
-      const data = await res.json();
-      removeTyping();
-      addMessage('bot', data.response, true);
-      setStatus(true);
-    } catch (err) {
-      removeTyping();
-      addMessage('bot', `<div class="bubble bot" style="color:#f87171;">⚠ API Error:<br><small>${err.message}</small></div>`);
-      setStatus(false);
+
+      wrap.appendChild(av);
+      wrap.appendChild(bubble);
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
     }
 
-    sendBtn.disabled = false;
-    input.focus();
-  }
-</script>
+    function addTyping() {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg bot';
+      wrap.id = 'typing-indicator';
+      wrap.innerHTML = `<div class="avatar bot">⚖️</div><div class="bubble bot"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function removeTyping() {
+      const t = document.getElementById('typing-indicator');
+      if (t) t.remove();
+    }
+
+    // ── Send query ────────────────────────────────────────────────
+    async function sendQuery() {
+      const q = input.value.trim();
+      if (!q) return;
+
+      input.value = '';
+      input.style.height = 'auto';
+      sendBtn.disabled = true;
+
+      addMessage('user', q);
+      addTyping();
+
+      try {
+        // Calls relative API path handled by Nginx proxy
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q })
+        });
+
+        if (!res.ok) {
+          let errMsg = `HTTP ${res.status}`;
+          try { const errData = await res.json(); errMsg = errData.error || errMsg; } catch (e) { }
+          if (res.status === 503) {
+            throw new Error("The AI model is currently initializing in the background. Please try again in 2-3 minutes!");
+          }
+          throw new Error(errMsg);
+        }
+
+        const data = await res.json();
+        removeTyping();
+        addMessage('bot', data.response, true);
+        setStatus(true);
+
+      } catch (err) {
+        removeTyping();
+        addMessage('bot', `<div class="bubble bot" style="color:#f87171;">⚠ API Error:<br><small>${err.message}</small></div>`);
+        setStatus(false);
+
+        // Log the frontend error to the backend
+        fetch('/api/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: err.message })
+        }).catch(e => console.log("Failed to forward log"));
+      }
+
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  </script>
 </body>
+
 </html>
