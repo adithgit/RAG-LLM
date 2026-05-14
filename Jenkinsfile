@@ -56,7 +56,6 @@ pipeline {
                         docker tag ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
                         docker push ${DOCKER_REGISTRY}/${APP_NAME_BACKEND}:latest
                         """
-                        }
                     }
                 }
             }
