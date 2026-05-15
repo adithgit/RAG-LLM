@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
       - name: model-downloader
-        image: jman003/lawracle-backend:latest
+        image: adithya952/lawracle-backend:latest
         imagePullPolicy: Always
         command: ["python3", "-c"]
         args:
