@@ -53,7 +53,7 @@ spec:
             cpu: "500m"
       containers:
       - name: backend
-        image: jman003/lawracle-backend:latest
+        image: adithya952/lawracle-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
